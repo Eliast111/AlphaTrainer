@@ -1,0 +1,198 @@
+"""
+AlphaTrainer 1.0
+Ponto de entrada principal.
+"""
+
+from core import AlphaCore
+from data.dataset import Dataset
+from learning.optimizer import GradientDescent
+
+
+def show_banner():
+    print("\n" + "=" * 40)
+    print("          ALPHATECHNOLOGIES")
+    print("             AlphaTrainer")
+    print("                 V1.0")
+    print("=" * 40)
+
+
+def show_menu():
+    print("\nMENU PRINCIPAL")
+    print("1. Criar modelo")
+    print("2. Listar modelos")
+    print("3. Remover modelo")
+    print("4. Estado do sistema")
+    print("5. Treinar modelo")
+    print("0. Sair")
+
+
+def create_model(alpha):
+    print("\nCRIAR MODELO")
+    name = input("Nome do modelo: ").strip()
+
+    try:
+        raw_sizes = input(
+            "Tamanhos das camadas (exemplo: 2,4,1): "
+        )
+
+        layer_sizes = [
+            int(value.strip())
+            for value in raw_sizes.split(",")
+        ]
+
+        activation = input(
+            "Ativacao (relu, sigmoid, tanh, linear) [relu]: "
+        ).strip().lower() or "relu"
+
+        model = alpha.create_model(
+            name,
+            layer_sizes,
+            activation=activation
+        )
+
+        print("\nModelo criado com sucesso!")
+        print("Camadas:", model.layer_count())
+
+    except (ValueError, TypeError) as error:
+        print("\nNao foi possivel criar o modelo:", error)
+
+
+def list_models(alpha):
+    print("\nMODELOS REGISTADOS")
+    models = alpha.list_models()
+
+    if not models:
+        print("Ainda nao existem modelos registados.")
+        return
+
+    for index, name in enumerate(models, start=1):
+        print(f"{index}. {name}")
+
+    print("Total:", alpha.model_count())
+
+
+def remove_model(alpha):
+    print("\nREMOVER MODELO")
+    name = input("Nome do modelo: ").strip()
+
+    try:
+        alpha.remove_model(name)
+        print("Modelo removido com sucesso!")
+
+    except (ValueError, KeyError) as error:
+        print("Nao foi possivel remover:", error)
+
+
+def show_status(alpha):
+    print("\nESTADO DO ALPHATRAINER")
+    print("Versao: 1.0")
+    print("Nucleo: AlphaCore")
+    print("Registry: ativo")
+    print("Modelos registados:", alpha.model_count())
+    print("Estado: operacional")
+
+
+def train_model(alpha):
+    print("\nTREINAR MODELO")
+
+    if alpha.model_count() == 0:
+        print("Cria primeiro um modelo na opcao 1.")
+        return
+
+    print("Modelos disponiveis:", ", ".join(alpha.list_models()))
+    name = input("Nome do modelo: ").strip()
+
+    try:
+        alpha.get_model(name)
+
+        sample_count = int(
+            input("Quantidade de amostras de treino: ")
+        )
+
+        if sample_count <= 0:
+            raise ValueError("A quantidade deve ser positiva.")
+
+        samples = []
+
+        for index in range(sample_count):
+            print(f"\nAMOSTRA {index + 1}")
+
+            inputs = [
+                float(value.strip())
+                for value in input(
+                    "Entradas (separadas por virgula): "
+                ).split(",")
+            ]
+
+            targets = [
+                float(value.strip())
+                for value in input(
+                    "Alvos esperados (separados por virgula): "
+                ).split(",")
+            ]
+
+            samples.append((inputs, targets))
+
+        dataset = Dataset(samples)
+
+        epochs = int(input("\nNumero de epocas: "))
+        learning_rate = float(
+            input("Taxa de aprendizagem [0.01]: ") or "0.01"
+        )
+
+        optimizer = GradientDescent(
+            learning_rate=learning_rate
+        )
+
+        print("\nTreinamento iniciado...")
+
+        result = alpha.train_model(
+            name,
+            dataset,
+            optimizer,
+            epochs=epochs
+        )
+
+        print("\nTREINAMENTO CONCLUIDO!")
+        print("Modelo:", name)
+        print("Epocas:", result["epochs"])
+        print("Erro inicial:", result["history"][0])
+        print("Erro final:", result["final_loss"])
+
+    except (ValueError, TypeError, KeyError) as error:
+        print("\nNao foi possivel treinar:", error)
+
+
+def main():
+    alpha = AlphaCore()
+    show_banner()
+
+    while True:
+        show_menu()
+        option = input("\nEscolhe uma opcao: ").strip()
+
+        if option == "1":
+            create_model(alpha)
+
+        elif option == "2":
+            list_models(alpha)
+
+        elif option == "3":
+            remove_model(alpha)
+
+        elif option == "4":
+            show_status(alpha)
+
+        elif option == "5":
+            train_model(alpha)
+
+        elif option == "0":
+            print("\nAlphaTrainer encerrado.")
+            break
+
+        else:
+            print("\nOpcao invalida. Tenta novamente.")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,126 @@
+"""
+AlphaTrainer 1.0
+Ponto de entrada principal.
+"""
+
+from core import AlphaCore
+
+
+def show_banner():
+    print("\n" + "=" * 40)
+    print("          ALPHATECHNOLOGIES")
+    print("             AlphaTrainer")
+    print("                 V1.0")
+    print("=" * 40)
+
+
+def show_menu():
+    print("\nMENU PRINCIPAL")
+    print("1. Criar modelo")
+    print("2. Listar modelos")
+    print("3. Remover modelo")
+    print("4. Estado do sistema")
+    print("0. Sair")
+
+
+def create_model(alpha):
+    print("\nCRIAR MODELO")
+
+    name = input("Nome do modelo: ").strip()
+
+    try:
+        raw_sizes = input(
+            "Tamanhos das camadas (exemplo: 2,4,1): "
+        )
+
+        layer_sizes = [
+            int(value.strip())
+            for value in raw_sizes.split(",")
+        ]
+
+        activation = input(
+            "Ativacao (relu, sigmoid, tanh, linear) [relu]: "
+        ).strip().lower() or "relu"
+
+        model = alpha.create_model(
+            name,
+            layer_sizes,
+            activation=activation
+        )
+
+        print("\nModelo criado com sucesso!")
+        print("Camadas:", model.layer_count())
+
+    except (ValueError, TypeError) as error:
+        print("\nNao foi possivel criar o modelo:", error)
+
+
+def list_models(alpha):
+    print("\nMODELOS REGISTADOS")
+
+    models = alpha.list_models()
+
+    if not models:
+        print("Ainda nao existem modelos registados.")
+        return
+
+    for index, name in enumerate(models, start=1):
+        print(f"{index}. {name}")
+
+    print("Total:", alpha.model_count())
+
+
+def remove_model(alpha):
+    print("\nREMOVER MODELO")
+
+    name = input("Nome do modelo: ").strip()
+
+    try:
+        alpha.remove_model(name)
+        print("Modelo removido com sucesso!")
+
+    except (ValueError, KeyError) as error:
+        print("Nao foi possivel remover:", error)
+
+
+def show_status(alpha):
+    print("\nESTADO DO ALPHATRAINER")
+    print("Versao: 1.0")
+    print("Nucleo: AlphaCore")
+    print("Registry: ativo")
+    print("Modelos registados:", alpha.model_count())
+    print("Estado: operacional")
+
+
+def main():
+    alpha = AlphaCore()
+
+    show_banner()
+
+    while True:
+        show_menu()
+
+        option = input("\nEscolhe uma opcao: ").strip()
+
+        if option == "1":
+            create_model(alpha)
+
+        elif option == "2":
+            list_models(alpha)
+
+        elif option == "3":
+            remove_model(alpha)
+
+        elif option == "4":
+            show_status(alpha)
+
+        elif option == "0":
+            print("\nAlphaTrainer encerrado.")
+            break
+
+        else:
+            print("\nOpcao invalida. Tenta novamente.")
+
+
+if __name__ == "__main__":
+    main()
