@@ -65,6 +65,16 @@ class Dataset:
     def __getitem__(self, index):
         return self.samples[index]
 
+    def to_numpy(self, dtype="float64"):
+        """Devolve (X, y) como arrays NumPy; requer NumPy instalado."""
+        try:
+            import numpy as np
+        except Exception as exc:
+            raise RuntimeError("to_numpy requer NumPy. Instala-o ou usa Dataset.samples.") from exc
+        inputs = np.asarray([item[0] for item in self.samples], dtype=dtype)
+        targets = np.asarray([item[1] for item in self.samples], dtype=dtype)
+        return inputs, targets
+
     def split(self, validation_ratio=0.2, shuffle=True, seed=None):
         ratio = float(validation_ratio)
 
@@ -145,3 +155,71 @@ class Dataset:
             raise ValueError("O ficheiro CSV nao contem dados validos.")
 
         return cls(samples)
+
+    @classmethod
+    def from_csv_labels(cls, path, delimiter=",", has_header=True):
+        """CSV de classificacao: a ULTIMA coluna e o rotulo (texto ou numero).
+
+        Devolve (dataset, classes); os alvos sao one-hot, na ordem de
+        `classes` (rotulos ordenados).
+        """
+        if not isinstance(delimiter, str) or len(delimiter) != 1:
+            raise ValueError("O delimitador deve ter um unico caractere.")
+
+        rows = []
+
+        with open(path, "r", encoding="utf-8-sig", newline="") as file:
+            reader = csv.reader(file, delimiter=delimiter)
+
+            if has_header:
+                next(reader, None)
+
+            start_line = 2 if has_header else 1
+
+            for line_number, row in enumerate(reader, start=start_line):
+                if not row or all(not cell.strip() for cell in row):
+                    continue
+
+                if len(row) < 2:
+                    raise ValueError(
+                        f"Colunas insuficientes na linha {line_number}."
+                    )
+
+                try:
+                    values = [float(cell.strip()) for cell in row[:-1]]
+                except ValueError:
+                    raise ValueError(
+                        f"Valor nao numerico na linha {line_number}."
+                    )
+
+                if not all(math.isfinite(v) for v in values):
+                    raise ValueError(
+                        f"Numero invalido na linha {line_number}."
+                    )
+
+                label = row[-1].strip()
+
+                if not label:
+                    raise ValueError(f"Rotulo vazio na linha {line_number}.")
+
+                rows.append((values, label))
+
+        if not rows:
+            raise ValueError("O ficheiro CSV nao contem dados validos.")
+
+        classes = sorted({label for _, label in rows})
+
+        if len(classes) < 2:
+            raise ValueError("Sao necessarias pelo menos duas classes.")
+
+        index = {label: i for i, label in enumerate(classes)}
+
+        samples = [
+            (
+                values,
+                [1.0 if i == index[label] else 0.0 for i in range(len(classes))]
+            )
+            for values, label in rows
+        ]
+
+        return cls(samples), classes

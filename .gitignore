@@ -1,6 +1,32 @@
 __pycache__/
+*.pyc
+saved_models/
+.alpha_*.tmp
+__pycache__/
 *.py[cod]
+.pytest_cache/
+saved_models/
+android_app/.buildozer/
+android_app/bin/
+android_app/src/
+
+reports/
+*.png
+
+# Protecao de dados e credenciais
 .env
+.env.*
+!.env.example
 .venv/
 venv/
 persistence/saved/
+
+# Backups locais
+*.bak
+*.backup
+webapp.py.bak-dashboard
+
+# Configuracao local Firebase
+android_app/firebase_config.py
+
+/secrets/

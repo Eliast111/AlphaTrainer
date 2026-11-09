@@ -1,0 +1,4 @@
+# Opcional para PC/Termux com wheels compativeis.
+numpy>=2.0
+scipy>=1.13
+matplotlib>=3.8

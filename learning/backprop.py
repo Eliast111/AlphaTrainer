@@ -3,10 +3,18 @@ Alpha Learning Engine V0.2
 Motor de retropropagacao de erros (Backpropagation).
 """
 
-from learning.loss import mse_derivative
+from learning.loss import mse_derivative, softmax
 
 
-def backpropagate(network, inputs, targets):
+def backpropagate(network, inputs, targets, loss="mse"):
+    """loss: "mse" ou "cross_entropy" (classificacao).
+
+    Com cross_entropy a camada de saida deve ser linear: as saidas sao
+    tratadas como logits e as predicoes devolvidas sao probabilidades.
+    """
+    if loss not in ("mse", "cross_entropy"):
+        raise ValueError("loss deve ser 'mse' ou 'cross_entropy'.")
+
     predictions, caches = network.forward_with_cache(inputs)
 
     if len(predictions) != len(targets):
@@ -21,16 +29,25 @@ def backpropagate(network, inputs, targets):
     output_layer = network.layers[-1]
     output_cache = caches[-1]["neurons"]
 
-    output_errors = mse_derivative(predictions, targets)
+    if loss == "cross_entropy":
+        if any(n.activation_name != "linear" for n in output_layer.neurons):
+            raise ValueError(
+                "cross_entropy exige a camada de saida com ativacao linear."
+            )
 
-    deltas[-1] = [
-        error * neuron.activation_derivative(cache["z"])
-        for neuron, cache, error in zip(
-            output_layer.neurons,
-            output_cache,
-            output_errors
-        )
-    ]
+        predictions = softmax(predictions)
+        deltas[-1] = [p - float(t) for p, t in zip(predictions, targets)]
+    else:
+        output_errors = mse_derivative(predictions, targets)
+
+        deltas[-1] = [
+            error * neuron.activation_derivative(cache["z"])
+            for neuron, cache, error in zip(
+                output_layer.neurons,
+                output_cache,
+                output_errors
+            )
+        ]
 
     # Propaga o erro pelas camadas anteriores.
     for layer_index in range(len(network.layers) - 2, -1, -1):

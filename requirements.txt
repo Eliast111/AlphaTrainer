@@ -1,0 +1,2 @@
+# AlphaTrainer nao tem dependencias externas (apenas biblioteca padrao).
+# Requer Python 3.8 ou superior.

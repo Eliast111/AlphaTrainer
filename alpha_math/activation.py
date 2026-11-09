@@ -42,3 +42,14 @@ def linear(x):
 
 def linear_derivative(x):
     return 1.0
+
+
+LEAKY_SLOPE = 0.01
+
+
+def leaky_relu(x):
+    return x if x > 0 else LEAKY_SLOPE * x
+
+
+def leaky_relu_derivative(x):
+    return 1.0 if x > 0 else LEAKY_SLOPE

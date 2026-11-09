@@ -4,9 +4,9 @@ Neuronio artificial com suporte a gradientes.
 """
 
 from alpha_math.activation import (
-    linear, relu, sigmoid, tanh,
+    linear, relu, sigmoid, tanh, leaky_relu,
     linear_derivative, relu_derivative,
-    sigmoid_derivative, tanh_derivative
+    sigmoid_derivative, tanh_derivative, leaky_relu_derivative
 )
 
 ACTIVATIONS = {
@@ -14,6 +14,7 @@ ACTIVATIONS = {
     "relu": relu,
     "sigmoid": sigmoid,
     "tanh": tanh,
+    "leaky_relu": leaky_relu,
 }
 
 DERIVATIVES = {
@@ -21,6 +22,7 @@ DERIVATIVES = {
     "relu": relu_derivative,
     "sigmoid": sigmoid_derivative,
     "tanh": tanh_derivative,
+    "leaky_relu": leaky_relu_derivative,
 }
 
 
@@ -30,7 +32,10 @@ class Neuron:
             raise ValueError("O neuronio precisa de pelo menos um peso.")
 
         if activation not in ACTIVATIONS:
-            raise ValueError("Funcao de ativacao desconhecida.")
+            raise ValueError(
+                "Funcao de ativacao desconhecida: "
+                f"{activation!r}. Disponiveis: {', '.join(sorted(ACTIVATIONS))}."
+            )
 
         self.weights = [float(w) for w in weights]
         self.bias = float(bias)

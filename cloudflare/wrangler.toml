@@ -1,0 +1,7 @@
+name = "alphatrainer-api"
+main = "worker.js"
+compatibility_date = "2026-11-05"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "alphatrainer-photos"
