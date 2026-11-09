@@ -50,7 +50,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            git zip unzip ant \
+
+      - name: Verificar Apache Ant
+        run: |
+          ant -version
+          which ant
+          ls -l /usr/bin/ant            git zip unzip ant \
             autoconf automake libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev \
             libtinfo6 cmake libffi-dev libssl-dev \
