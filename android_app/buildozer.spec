@@ -1,3 +1,4 @@
+# Rebuild trigger 2026-11-10
 [app]
 title = AlphaTrainer
 package.name = alphatrainer
