@@ -1,3 +1,4 @@
+
 name: Build AlphaTrainer Flet APK
 
 on:
@@ -22,6 +23,7 @@ on:
       - 'evaluation/**'
       - 'transformer/**'
       - '.github/workflows/flet-android.yml'
+
 permissions:
   contents: read
 
@@ -33,18 +35,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --python 3.14 --no-install-project
+
+      - name: Check Flet
+        run: uv run flet --version
+
       - name: Build APK
-        id: build
-        uses: flet-dev/flet-build-action@v1
-        with:
-          target: apk
-          runner-python-version: "3.14"
-          bundled-python-version: "3.14"
-          build-number: ${{ github.run_number }}
+        run: uv run flet build apk --yes --verbose --build-number "${{ github.run_number }}"
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          path: ${{ steps.build.outputs.archive-path }}
-          archive: false
+          name: AlphaTrainer-APK
+          path: build/apk
           if-no-files-found: error
+          retention-days: 14
+
