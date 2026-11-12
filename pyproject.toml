@@ -1,0 +1,59 @@
+[project]
+name = "alphatrainer"
+version = "1.3.0"
+description = "AlphaTrainer AI Studio"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "flet==1.1.2"
+]
+
+[tool.flet]
+org = "com.alphatrainer"
+product = "AlphaTrainer"
+
+[tool.flet.app]
+path = "."
+module = "flet_app"
+exclude = [
+    ".git",
+    "tests",
+    "secrets",
+    "android_app",
+    "android-app",
+    "backups",
+    "cloud-backup-20261104-233533",
+    "alpha-build.log",
+    "alpha-build-2.log",
+    "main.py.backup",
+    "main.py.backup_persistence",
+    "main.py.backup_phase10_eval",
+    "webapp.py.bak-dashboard",
+    "android_app/buildozer.spec.backup-20261105-003803",
+    "android_app/firebase_config.example.py.backup-20261109-225007",
+    "android_app/firebase_config.example.py.backup-20261109-225024",
+    "android_app/firebase_config.example.py.backup-20261109-225132",
+    "android_app/firebase_config.example.py.backup-20261109-225227",
+    "android_app/firebase_config.py.backup-20261109-225007",
+    "android_app/firebase_config.py.backup-20261109-225024",
+    "android_app/firebase_config.py.backup-20261109-225132",
+    "android_app/firebase_config.py.backup-20261109-225227",
+    "android_app/main.py.backup-20261105-003906",
+    "android_app/main.py.backup-20261105-005406",
+    "android_app/main.py.backup-20261105-010238",
+    "android_app/main.py.backup-6.7.1-20261105-004328",
+    "android_app/main.py.backup-6.7.4-20261105-004617",
+    "android_app/main.py.backup-6.7.4-fixed-20261105-004807",
+    "android_app/main.py.bak-20261105-003018",
+    "android_app/prepare_android.py.bak-20261105-002619",
+    "android_app/prepare_android.py.bak-20261105-003018",
+    "cloud/firebase_auth.py.bak-20261104",
+    "cloud/firebase_auth.py.pre-fix",
+    "cloud/firebase_sync.py.bak-20261105-002534",
+    "cloud/profile.py.backup-20261105-010238",
+    "core/alpha_core.py.backup-20261105-005406",
+    "tests/test_firebase_sync.py.bak-20261105-002534",
+    "persistence/saved",
+    "saved_models",
+]
+[tool.flet.android]
+min_sdk_version = 24
