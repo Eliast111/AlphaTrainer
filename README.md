@@ -69,9 +69,21 @@ podem ser registrados com um builder chamável:
     factory = AIModelFactory()
     model = factory.create("feedforward", layer_sizes=[2, 3, 1])
 
-O runtime pode executar inferência em modelos com `forward()` e gerar tokens para
-modelos de linguagem. `AlphaCore` disponibiliza `create_language_model()` e
-`run_model()` como interface integrada. PyTorch e TensorFlow não são necessários.
+O runtime permite executar inferência em modelos com `forward()` e gerar tokens
+para modelos de linguagem. A interface de alto nível integra criação, inferência
+e geração:
+
+    from core import AlphaCore
+    from language.vocabulary import Vocabulary
+
+    alpha = AlphaCore()
+    vocabulary = Vocabulary().build([["ola", "mundo"]])
+    alpha.create_language_model("texto", vocabulary)
+    resultado = alpha.generate_text("texto", "ola", max_new_tokens=5)
+
+`AlphaCore` também oferece `create_model_by_type()`, `run_model()`,
+`predict_next()`, `generate_tokens()`, treinamento, avaliação e relatórios.
+PyTorch e TensorFlow não são necessários.
 
 ## Persistencia
 
