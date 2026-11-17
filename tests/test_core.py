@@ -2,7 +2,10 @@ import unittest
 
 from core import AlphaCore
 from data.dataset import Dataset
+from language.vocabulary import Vocabulary
 from learning.optimizer import GradientDescent
+from neural.network import Network
+from transformer.language_model import LanguageModel
 
 
 class TestAlphaCore(unittest.TestCase):
@@ -50,6 +53,45 @@ class TestAlphaCore(unittest.TestCase):
     def test_invalid_layer_sizes(self):
         with self.assertRaises(ValueError):
             self.alpha.create_model("modelo_invalido", [2])
+
+    def test_create_model_by_type(self):
+        model = self.alpha.create_model_by_type(
+            "modelo_factory", "feedforward", layer_sizes=[2, 1]
+        )
+        self.assertIsInstance(model, Network)
+        self.assertIs(model, self.alpha.get_model("modelo_factory"))
+
+    def test_create_language_model(self):
+        vocabulary = Vocabulary().build([["ola", "mundo"]])
+        model = self.alpha.create_language_model(
+            "modelo_linguagem", vocabulary, embedding_dim=4
+        )
+        self.assertIsInstance(model, LanguageModel)
+        self.assertEqual(self.alpha.model_count(), 1)
+
+    def test_unknown_model_type_does_not_register_model(self):
+        with self.assertRaises(ValueError):
+            self.alpha.create_model_by_type("modelo_invalido", "unknown")
+        self.assertEqual(self.alpha.model_count(), 0)
+
+    def test_run_model(self):
+        self.alpha.create_model(
+            "modelo_execucao", [1, 1], activation="linear"
+        )
+        self.assertEqual(len(self.alpha.run_model("modelo_execucao", [1.0])), 1)
+
+    def test_generate_language_model(self):
+        vocabulary = Vocabulary().build([["ola", "mundo"]])
+        self.alpha.create_language_model(
+            "modelo_geracao", vocabulary, embedding_dim=4,
+            hidden_dim=4, max_length=8, seed=1
+        )
+        prompt = [vocabulary.get_id("ola")]
+        generated = self.alpha.generate_tokens(
+            "modelo_geracao", prompt, max_new_tokens=2
+        )
+        self.assertEqual(len(generated), 3)
+        self.assertEqual(len(prompt), 1)
 
     def test_train_model(self):
         self.alpha.create_model(
