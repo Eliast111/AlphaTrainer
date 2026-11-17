@@ -30,3 +30,29 @@ webapp.py.bak-dashboard
 android_app/firebase_config.py
 
 /secrets/
+
+# Configuracao gerada durante a compilacao Android
+android_app/src/firebase_config.py
+
+# Protecao adicional de credenciais e configuracoes
+**/firebase_config.py
+**/firebase_config.py.*
+**/*service-account*.json
+**/*adminsdk*.json
+**/*credentials*.json
+**/*private*key*
+*.backup*
+*.bak*
+
+# Ambientes e ficheiros locais
+.venv/
+.venv-*/
+venv/
+backups/
+cloud-backup-*/
+*.log
+*.zip
+*.pre-fix
+/saved
+/PY
+/android-app

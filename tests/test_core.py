@@ -115,5 +115,36 @@ class TestAlphaCore(unittest.TestCase):
         self.assertEqual(report["summary"]["samples"], 2)
 
 
+    def test_benchmark_models(self):
+        self.alpha.create_model(
+            "modelo_benchmark_a",
+            [1, 1],
+            activation="linear"
+        )
+        self.alpha.create_model(
+            "modelo_benchmark_b",
+            [1, 1],
+            activation="linear"
+        )
+
+        dataset = Dataset([
+            ([1.0], [0.0]),
+            ([2.0], [0.0]),
+        ])
+
+        result = self.alpha.benchmark_models(
+            {
+                "modelo_benchmark_a": dataset,
+                "modelo_benchmark_b": dataset,
+            },
+            metric="mse",
+            direction="min"
+        )
+
+        self.assertEqual(len(result["ranking"]), 2)
+        self.assertIn(result["best_model"], result["ranking"])
+        self.assertIn("best_value", result)
+
+
 if __name__ == "__main__":
     unittest.main()

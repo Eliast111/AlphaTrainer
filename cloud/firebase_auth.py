@@ -7,6 +7,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from config.settings import Settings
+
 
 IDENTITY_URL = "https://identitytoolkit.googleapis.com/v1"
 TOKEN_URL = "https://securetoken.googleapis.com/v1/token"
@@ -18,9 +20,8 @@ class FirebaseAuthError(Exception):
 
 class FirebaseAuth:
     def __init__(self, api_key=None, timeout=15):
-        self.api_key = api_key or os.environ.get(
-            "ALPHATRAINER_FIREBASE_API_KEY"
-        )
+        settings = Settings.from_env()
+        self.api_key = api_key or settings.firebase_api_key
 
         if not self.api_key:
             raise FirebaseAuthError(

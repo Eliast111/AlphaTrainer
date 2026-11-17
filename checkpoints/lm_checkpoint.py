@@ -22,7 +22,7 @@ def _check_finite(array):
                 raise ValueError("O modelo contem valores nao finitos.")
 
 
-def save_language_model(model, path):
+def save_language_model(model, path, metadata=None):
     if not isinstance(model, LanguageModel):
         raise TypeError("O objeto deve ser um LanguageModel.")
 
@@ -43,6 +43,11 @@ def save_language_model(model, path):
         "vocabulary": list(model.vocabulary.id_to_token),
         "weights": weights,
     }
+
+    if metadata is not None:
+        if not isinstance(metadata, dict):
+            raise TypeError("metadata deve ser um dicionario.")
+        data["metadata"] = metadata
 
     write_json_atomic(data, path)
 

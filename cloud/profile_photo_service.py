@@ -29,12 +29,12 @@ class ProfilePhotoService:
         ),
     }
 
-    def __init__(self, session_manager, cache_dir):
+    def __init__(self, session_manager, cache_dir, storage=None):
         self.session_manager = session_manager
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.storage = SupabaseStorage(
+        self.storage = storage or SupabaseStorage(
             session_manager=session_manager
         )
 

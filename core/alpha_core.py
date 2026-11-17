@@ -15,10 +15,15 @@ def _synchronized(method):
 
 from models.factory import create_model
 from registry.registry import ModelRegistry
+from models.manager import ModelManager
+from ai_runtime import AIRuntime
 from training.trainer import Trainer
+from training.universal import UniversalTrainingEngine
 from evaluation.evaluator import evaluate_model
 from evaluation.report import generate_report
 from evaluation.classification import classification_report
+from evaluation.universal import UniversalEvaluationEngine
+from evaluation.benchmark import UniversalBenchmarkEngine
 from checkpoints import save_any, load_any
 from neural.network import Network
 from transformer.language_model import LanguageModel
@@ -29,6 +34,11 @@ class AlphaCore:
     def __init__(self):
         self._lock = RLock()
         self.registry = ModelRegistry()
+        self.model_manager = ModelManager(self.registry)
+        self.runtime = AIRuntime(self.model_manager)
+        self.training_engine = UniversalTrainingEngine(self.model_manager)
+        self.evaluation_engine = UniversalEvaluationEngine(self.model_manager)
+        self.benchmark_engine = UniversalBenchmarkEngine(self.model_manager)
 
     # ------------------------------------------------------------------
     # Gestao de modelos
@@ -57,7 +67,7 @@ class AlphaCore:
             seed=seed
         )
 
-        return self.registry.register(name, model)
+        return self.model_manager.register(name, model)
 
     @_synchronized
     def create_language_model(self, name, texts, **options):
@@ -70,11 +80,28 @@ class AlphaCore:
 
         model = LanguageModel.from_texts(texts, **options)
 
-        return self.registry.register(name, model)
+        return self.model_manager.register(name, model)
 
     @_synchronized
-    def register_model(self, name, model):
-        return self.registry.register(name, model)
+    def register_model(self, name, model, adapter=None):
+        return self.model_manager.register(
+            name, model, adapter=adapter
+        )
+
+    @_synchronized
+    def runtime_predict(self, name, inputs):
+        """Executa previsao atraves do AI Runtime."""
+        return self.runtime.predict(name, inputs)
+
+    @_synchronized
+    def runtime_generate(self, name, prompt="", **options):
+        """Executa geracao de texto atraves do AI Runtime."""
+        return self.runtime.generate(name, prompt, **options)
+
+    @_synchronized
+    def runtime_forward(self, name, inputs):
+        """Executa forward atraves do AI Runtime."""
+        return self.runtime.forward(name, inputs)
 
     @_synchronized
     def get_model(self, name):
@@ -86,11 +113,35 @@ class AlphaCore:
 
     @_synchronized
     def remove_model(self, name):
-        return self.registry.remove(name)
+        return self.model_manager.remove(name)
 
     @_synchronized
     def model_count(self):
         return self.registry.count()
+
+    @_synchronized
+    def model_metadata(self, name):
+        """Devolve metadados de ciclo de vida sem expor o objeto interno."""
+        from dataclasses import asdict
+        return asdict(self.model_manager.metadata(name))
+
+    @_synchronized
+    def model_capabilities(self, name):
+        from dataclasses import asdict
+        return asdict(self.model_manager.capabilities(name))
+
+    @_synchronized
+    def list_model_metadata(self):
+        from dataclasses import asdict
+        return [asdict(item) for item in self.model_manager.list_metadata()]
+
+    @_synchronized
+    def rename_model(self, old_name, new_name):
+        return self.model_manager.rename(old_name, new_name)
+
+    @_synchronized
+    def duplicate_model(self, name, new_name):
+        return self.model_manager.duplicate(name, new_name)
 
     @_synchronized
     def describe_model(self, name):
@@ -127,6 +178,19 @@ class AlphaCore:
     # Treino / avaliacao
 
     @_synchronized
+    def train_universal(
+        self, name, data, optimizer=None, epochs=100, **options
+    ):
+        """Treina automaticamente segundo a arquitetura do modelo."""
+        return self.training_engine.train(
+            name,
+            data,
+            optimizer=optimizer,
+            epochs=epochs,
+            **options
+        )
+
+    @_synchronized
     def train_model(
         self,
         name,
@@ -138,13 +202,21 @@ class AlphaCore:
         model = self.get_model(name)
 
         trainer = Trainer(optimizer)
-
-        return trainer.fit(
-            model,
-            dataset,
-            epochs=epochs,
-            **options
-        )
+        self.model_manager.update_training(name, status="training")
+        try:
+            result = trainer.fit(
+                model,
+                dataset,
+                epochs=epochs,
+                **options
+            )
+            self.model_manager.update_training(
+                name, status="completed", metrics=result
+            )
+            return result
+        except Exception:
+            self.model_manager.update_training(name, status="failed")
+            raise
 
     @_synchronized
     def train_language_model(self, name, texts, epochs=50, **options):
@@ -153,7 +225,30 @@ class AlphaCore:
         if not isinstance(model, LanguageModel):
             raise TypeError("O modelo nao e um modelo de linguagem.")
 
-        return model.fit(texts, epochs=epochs, **options)
+        self.model_manager.update_training(name, status="training")
+        try:
+            result = model.fit(texts, epochs=epochs, **options)
+            self.model_manager.update_training(
+                name, status="completed", metrics=result
+            )
+            return result
+        except Exception:
+            self.model_manager.update_training(name, status="failed")
+            raise
+
+
+
+    @_synchronized
+    def benchmark_models(self, models, metric="mse", direction="min"):
+        """Compara modelos usando metricas compativeis."""
+        return self.benchmark_engine.run(
+            models, metric=metric, direction=direction
+        )
+
+    @_synchronized
+    def evaluate_universal(self, name, data):
+        """Avalia modelos atraves do motor universal."""
+        return self.evaluation_engine.evaluate(name, data)
 
     @_synchronized
     def evaluate(self, name, dataset):
@@ -218,4 +313,4 @@ class AlphaCore:
         if name in self.registry.models:
             raise ValueError("Ja existe um modelo com esse nome")
 
-        return self.registry.register(name, load_any(path))
+        return self.model_manager.register(name, load_any(path))

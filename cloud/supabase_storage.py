@@ -1,7 +1,6 @@
 """Armazenamento privado de fotografias do AlphaTrainer."""
 
 import mimetypes
-import os
 import re
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -27,28 +26,13 @@ class SupabaseStorage:
         self, url=None, publishable_key=None,
         session_manager=None, timeout=25
     ):
-        if not url or not publishable_key:
-            try:
-                from firebase_config import (
-                    SUPABASE_URL,
-                    SUPABASE_PUBLISHABLE_KEY,
-                )
-            except ImportError:
-                try:
-                    from android_app.firebase_config import (
-                        SUPABASE_URL,
-                        SUPABASE_PUBLISHABLE_KEY,
-                    )
-                except ImportError:
-                    SUPABASE_URL = ""
-                    SUPABASE_PUBLISHABLE_KEY = ""
+        from config.settings import Settings
 
-            url = url or os.environ.get("SUPABASE_URL") or SUPABASE_URL
-            publishable_key = (
-                publishable_key
-                or os.environ.get("SUPABASE_PUBLISHABLE_KEY")
-                or SUPABASE_PUBLISHABLE_KEY
-            )
+        settings = Settings.from_env()
+        url = url or settings.supabase_url
+        publishable_key = (
+            publishable_key or settings.supabase_publishable_key
+        )
 
         self.url = (url or "").rstrip("/")
         self.key = publishable_key or ""

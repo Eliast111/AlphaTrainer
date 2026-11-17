@@ -33,9 +33,17 @@ def load_any(path):
 
 
 def save_any(model, path, metadata=None):
+    """Guarda apenas arquiteturas com checkpoint explicitamente suportado."""
     from neural.network import Network
+    from transformer.language_model import LanguageModel
 
     if isinstance(model, Network):
         return save_model(model, path, metadata=metadata)
 
-    return save_language_model(model, path)
+    if isinstance(model, LanguageModel):
+        return save_language_model(model, path, metadata=metadata)
+
+    raise TypeError(
+        "Arquitetura sem checkpoint suportado: "
+        + type(model).__module__ + "." + type(model).__name__
+    )

@@ -9,10 +9,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
+from config.settings import Settings
 
-DATABASE_URL = (
-    "https://allphatrainer-default-rtdb.firebaseio.com"
-)
+
 
 
 class FirebaseSyncError(Exception):
@@ -21,7 +20,7 @@ class FirebaseSyncError(Exception):
 
 class FirebaseSync:
     def __init__(
-        self, session, database_url=DATABASE_URL, timeout=20,
+        self, session, database_url=None, timeout=20,
         session_manager=None
     ):
         self.session_manager = session_manager
@@ -30,7 +29,10 @@ class FirebaseSync:
             if session_manager is not None
             else session
         ) or {}
-        self.database_url = database_url.rstrip("/")
+        settings = Settings.from_env()
+        self.database_url = (
+            database_url or settings.firebase_database_url
+        ).rstrip("/")
         self.timeout = timeout
 
     def _url(self, path):

@@ -1,0 +1,19 @@
+ALPHATRAINER — PATCH FASE 5 (LOCAL LEARNING)
+
+Inclui:
+- validação prévia de checkpoints e restauração transacional;
+- capacidades explícitas forward/resume nos adaptadores;
+- verificação de capacidades no runtime e motor universal;
+- SDK local Python em sdk/;
+- testes do SDK e atualização do README.
+
+APLICAÇÃO MANUAL SEGURA NO TERMUX:
+1. Extrair este ZIP para uma pasta temporária separada.
+2. Copiar os ficheiros mantendo os caminhos relativos para ~/AlphaTrainer.
+3. Antes de substituir, fazer cópia dos ficheiros existentes.
+4. Executar primeiro os testes específicos e depois a suite completa.
+
+Este patch foi preparado a partir dos dois ZIPs enviados. Os ZIPs não
+continham todos os módulos de dependências/testes do projeto; por isso,
+não é possível certificar aqui a suite completa nem afirmar que a Fase 5
+está concluída. A validação final deve ser feita no Termux do projeto.

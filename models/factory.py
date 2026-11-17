@@ -95,3 +95,39 @@ def create_model(
         layers.append(Layer(neurons))
 
     return Network(layers)
+
+
+class ModelFactory:
+    """Fabrica multimodelo; as funcoes legadas continuam disponiveis."""
+
+    def __init__(self):
+        from models.plugins import PluginRegistry
+        self.plugins = PluginRegistry()
+        self._builders = {
+            "dense": self._build_dense,
+            "transformer_lm": self._build_transformer,
+        }
+
+    @staticmethod
+    def _build_dense(**config):
+        sizes = config.pop("layer_sizes")
+        return create_model(sizes, **config)
+
+    @staticmethod
+    def _build_transformer(**config):
+        from transformer.language_model import LanguageModel
+        texts = config.pop("texts")
+        return LanguageModel.from_texts(texts, **config)
+
+    def register_builder(self, architecture, builder):
+        if architecture in self._builders:
+            raise ValueError("Arquitetura ja suportada: " + architecture)
+        self.plugins.register(architecture, builder)
+
+    def create(self, architecture, **config):
+        if architecture in self._builders:
+            return self._builders[architecture](**config)
+        return self.plugins.create(architecture, **config)
+
+    def architectures(self):
+        return sorted(set(self._builders) | set(self.plugins.list_plugins()))
