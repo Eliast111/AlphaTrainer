@@ -12,7 +12,8 @@ AlphaTrainer e um framework educacional de inteligencia artificial desenvolvido 
 - Otimizadores e treinamento.
 - Gestao de datasets.
 - Avaliacao e comparacao de modelos.
-- Model Factory e Registry.
+- AI Model Factory extensivel e Model Registry.
+- Runtime nativo para inferencia e geracao de tokens, sem dependencias externas.
 - Checkpoints e persistencia.
 - Tokenizacao, vocabulario e embeddings.
 - Arquitetura Transformer.
@@ -26,8 +27,9 @@ AlphaTrainer e um framework educacional de inteligencia artificial desenvolvido 
 - training/ — treinamento.
 - data/ — datasets.
 - evaluation/ — avaliacao e relatorios.
-- models/ — criacao de modelos.
+- models/ — criacao de modelos e AI Factory.
 - registry/ — registo de modelos.
+- runtime/ — inferencia e geracao com modelos nativos.
 - checkpoints/ — checkpoints.
 - persistence/ — persistencia.
 - language/ — processamento de linguagem.
@@ -39,7 +41,7 @@ AlphaTrainer e um framework educacional de inteligencia artificial desenvolvido 
 
 - Python 3.10 ou superior.
 - Terminal compativel com Python.
-- Sem dependencias externas declaradas atualmente.
+- Sem dependencias externas obrigatorias.
 
 ## Executar
 
@@ -57,6 +59,20 @@ AlphaTrainer e um framework educacional de inteligencia artificial desenvolvido 
 8. Comparar modelos
 0. Guardar dados e sair
 
+## Factory e runtime
+
+A factory unificada cria redes feedforward e modelos de linguagem. Tipos adicionais
+podem ser registrados com um builder chamável:
+
+    from models.ai_factory import AIModelFactory
+
+    factory = AIModelFactory()
+    model = factory.create("feedforward", layer_sizes=[2, 3, 1])
+
+O runtime pode executar inferência em modelos com `forward()` e gerar tokens para
+modelos de linguagem. `AlphaCore` disponibiliza `create_language_model()` e
+`run_model()` como interface integrada. PyTorch e TensorFlow não são necessários.
+
 ## Persistencia
 
 O PersistenceManager guarda e recupera modelos e datasets em persistence/saved/.
@@ -66,13 +82,6 @@ O PersistenceManager guarda e recupera modelos e datasets em persistence/saved/.
 Executar todos os testes:
 
     python -m unittest discover -v
-
-## Estado do projeto
-
-- Versao: 1.0
-- Organizacao: Alpha Technologies
-- Linguagem: Python
-- Ultima suite completa confirmada: 224 testes aprovados.
 
 ## Objetivo
 
